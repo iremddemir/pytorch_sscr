@@ -35,7 +35,7 @@ class SentenceEncoder(nn.Module):
         lengths[lengths == 0] = 1
 
         packed_padded_sequence = pack_padded_sequence(words,
-                                                      lengths,
+                                                      lengths.to('cpu'),
                                                       batch_first=True)
 
         self.gru.flatten_parameters()

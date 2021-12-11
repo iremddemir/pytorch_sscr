@@ -73,8 +73,8 @@ class ImageFolderNonGT(torch.utils.data.Dataset):
             generated_files.extend([os.path.join(generated_dirs[i], x)
                                     for x in os.listdir(os.path.join(self.root, generated_dirs[i]))])
 
-        gt_imgs = [x for x in gt_files if has_file_allowed_extension(x, IMG_EXTENSIONS)]
-        generated_imgs = [x for x in generated_files if has_file_allowed_extension(x, IMG_EXTENSIONS)]
+        gt_imgs = [x for x in gt_files if has_file_allowed_extension(x, tuple(IMG_EXTENSIONS))]
+        generated_imgs = [x for x in generated_files if has_file_allowed_extension(x, tuple(IMG_EXTENSIONS))]
         self.gt_filenames = gt_imgs
         self.generated_filenames = generated_imgs
 

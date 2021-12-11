@@ -15,7 +15,7 @@ class Logger():
         self.log_path = os.path.join(path, 'logs.txt')
 
         if not os.path.exists(path):
-            os.mkdir(path)
+            os.makedirs(path)
 
     def write_config(self, config):
         """ Logs Config file"""

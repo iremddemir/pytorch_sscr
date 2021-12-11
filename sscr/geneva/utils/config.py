@@ -11,7 +11,7 @@ from geneva.utils.logger import Logger
 
 # Global Keys
 with open('geneva/config.yml', 'r') as f:
-    keys = yaml.load(f)
+    keys = yaml.safe_load(f)
 
 
 # Experiment Configurations (Sorted by type then alphabetically)

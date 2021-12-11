@@ -55,7 +55,7 @@ class Tester():
         self.dataset_path = dataset_path
 
     def test(self):
-        for batch in self.dataloader:
+        for batch in tqdm(self.dataloader):
             self.model.predict(batch)
 
 

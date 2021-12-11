@@ -3,7 +3,7 @@
 --val_dataset=iclevr_val
 --test_dataset=iclevr_test
 --batch_size=32
---num_workers=8
+--num_workers=1
 --epochs=200
 --vis_rate=3
 --vis_server=http://localhost
@@ -55,4 +55,4 @@
 -teacher_forcing
 -use_fg
 -use_fd
---load_snapshot='models/iclevr_1.0_sscr.pt'
+--load_snapshot=models/iclevr_1.0_sscr.pt
