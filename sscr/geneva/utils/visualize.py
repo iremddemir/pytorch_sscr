@@ -5,9 +5,10 @@ import numpy as np
 from visdom import Visdom
 
 
-class VisdomPlotter():
+class VisdomPlotter:
     """Plots to Visdom"""
-    def __init__(self, env_name='TellDrawRepeat', server='http://localhost'):
+
+    def __init__(self, env_name="TellDrawRepeat", server="http://localhost"):
         """Visdom instance constuctor
         Args:
             - env_name: name of the environment (str)
@@ -20,7 +21,7 @@ class VisdomPlotter():
         self.fake_aggregate = []
         self.sigma_aggregate = []
 
-    def plot(self, var_name, split_name, x, y, xlabel='iteration'):
+    def plot(self, var_name, split_name, x, y, xlabel="iteration"):
         """Plots a line
         Args:
             - var_name: plot name (str)
@@ -35,10 +36,9 @@ class VisdomPlotter():
                 Y=np.array([y, y]),
                 env=self.env,
                 opts=dict(
-                    legend=[split_name],
-                    title=var_name,
-                    xlabel=xlabel,
-                    ylabel=var_name))
+                    legend=[split_name], title=var_name, xlabel=xlabel, ylabel=var_name
+                ),
+            )
         else:
             self.viz.line(
                 X=np.array([x]),
@@ -46,7 +46,8 @@ class VisdomPlotter():
                 env=self.env,
                 win=self.plots[var_name],
                 name=split_name,
-                update='append')
+                update="append",
+            )
 
     def draw(self, var_name, images, nrow=8):
         """Shows a grid of images
@@ -66,16 +67,13 @@ class VisdomPlotter():
         Takes no arguments, it uses the values saved using
         self.track
         """
-        self._histogram('D(x)',
-                        np.array(self.real_aggregate))
-        self._histogram('D(G(z))',
-                        np.array(self.fake_aggregate))
+        self._histogram("D(x)", np.array(self.real_aggregate))
+        self._histogram("D(G(z))", np.array(self.fake_aggregate))
         self.fake_aggregate = []
         self.real_aggregate = []
 
         if len(self.sigma_aggregate) > 0:
-            self._histogram('Sigma Gate',
-                            np.array(self.sigma_aggregate))
+            self._histogram("Sigma Gate", np.array(self.sigma_aggregate))
             self.sigma_aggregate = []
 
     def track(self, real, fake):
@@ -102,27 +100,25 @@ class VisdomPlotter():
     def _histogram(self, var_name, data):
         if var_name not in self.plots:
             self.plots[var_name] = self.viz.histogram(
-                X=data,
-                env=self.env,
-                opts=dict(numbins=20,
-                          title=var_name))
+                X=data, env=self.env, opts=dict(numbins=20, title=var_name)
+            )
         else:
             self.viz.histogram(
                 X=data,
                 env=self.env,
                 win=self.plots[var_name],
-                opts=dict(numbins=20,
-                          title=var_name))
+                opts=dict(numbins=20, title=var_name),
+            )
 
-    def write(self, text, var_name='dialog'):
+    def write(self, text, var_name="dialog"):
         """Shows Text in HTML format
         Args:
             - text: list of sentences (list)
             -var_name: plost title (str)
         """
-        text = [t.replace('<', '#') for t in text]
-        text = [t.replace('>', '#') for t in text]
-        text = str.join('<ol/ ><br/ ><ol>', text[:32])
+        text = [t.replace("<", "#") for t in text]
+        text = [t.replace(">", "#") for t in text]
+        text = str.join("<ol/ ><br/ ><ol>", text[:32])
         if var_name not in self.plots:
             self.plots[var_name] = self.viz.text(text)
         else:

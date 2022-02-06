@@ -16,27 +16,34 @@ from geneva.definitions.conditional_batchnorm import ConditionalBatchNorm2d
 
 class Conv1x1(nn.Conv2d):
     def __init__(self, ch_in, ch_out, ker=1, str=1, pad=0, bias=False):
-        super().__init__(ch_in, ch_out,
-                         kernel_size=ker, stride=str,
-                         padding=pad, bias=bias)
+        super().__init__(
+            ch_in, ch_out, kernel_size=ker, stride=str, padding=pad, bias=bias
+        )
 
 
 class Conv3x3(nn.Conv2d):
     def __init__(self, ch_in, ch_out, ker=3, str=1, pad=1, bias=False):
-        super().__init__(ch_in, ch_out,
-                         kernel_size=ker, stride=str,
-                         padding=pad, bias=bias)
+        super().__init__(
+            ch_in, ch_out, kernel_size=ker, stride=str, padding=pad, bias=bias
+        )
 
 
 class ResUpBlock(nn.Module):
-    def __init__(self, channels_in, channels_out, embedding_dim,
-                 conditional=True, self_attn=False,
-                 use_spectral_norm=True, activation='relu'):
+    def __init__(
+        self,
+        channels_in,
+        channels_out,
+        embedding_dim,
+        conditional=True,
+        self_attn=False,
+        use_spectral_norm=True,
+        activation="relu",
+    ):
         super().__init__()
         self.conditional = conditional
 
         self.activation = ACTIVATIONS[activation]
-        self.upsampler = nn.Upsample(scale_factor=2, mode='nearest')
+        self.upsampler = nn.Upsample(scale_factor=2, mode="nearest")
 
         if conditional:
             self.bn1 = ConditionalBatchNorm2d(channels_in, embedding_dim)
@@ -80,9 +87,16 @@ class ResUpBlock(nn.Module):
 
 
 class ResDownBlock(nn.Module):
-    def __init__(self, channels_in, channels_out, downsample=True,
-                 self_attn=False, first_block=False, activation='relu',
-                 use_spectral_norm=True):
+    def __init__(
+        self,
+        channels_in,
+        channels_out,
+        downsample=True,
+        self_attn=False,
+        first_block=False,
+        activation="relu",
+        use_spectral_norm=True,
+    ):
         super().__init__()
         self.first_block = first_block
 

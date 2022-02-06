@@ -5,7 +5,7 @@ import torch
 
 
 ACTIVATIONS = {
-    'relu': torch.nn.ReLU(),
-    'leaky_relu': torch.nn.LeakyReLU(),
-    'selu': torch.nn.SELU(),
+    "relu": torch.nn.ReLU(),
+    "leaky_relu": torch.nn.LeakyReLU(),
+    "selu": torch.nn.SELU(),
 }

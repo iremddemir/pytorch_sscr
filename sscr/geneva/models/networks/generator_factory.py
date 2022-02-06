@@ -12,7 +12,7 @@ from geneva.definitions.conditioning_augmentor import ConditioningAugmentor
 from geneva.definitions.res_blocks import Conv3x3, ResUpBlock
 
 
-class GeneratorFactory():
+class GeneratorFactory:
     @staticmethod
     def create_instance(cfg):
         """Creates an instance of a generator that matches
@@ -23,12 +23,13 @@ class GeneratorFactory():
         Returns:
              generator: generator instance that implements nn.Module
         """
-        if cfg.gan_type == 'recurrent_gan':
+        if cfg.gan_type == "recurrent_gan":
             return GeneratorRecurrentGANRes(cfg)
         else:
-            raise Exception('Model {} not available. Please select'
-                            'one of {recurrent_gan}'
-                            .format(cfg.model))
+            raise Exception(
+                "Model {} not available. Please select"
+                "one of {recurrent_gan}".format(cfg.model)
+            )
 
 
 class GeneratorRecurrentGANRes(nn.Module):
@@ -36,6 +37,7 @@ class GeneratorRecurrentGANRes(nn.Module):
     Recurrent GAN generator for 128x128 image generation,
     conditioned on previous image and current instruction
     """
+
     def __init__(self, cfg):
         super().__init__()
         self.conditional = cfg.conditioning is not None
@@ -45,39 +47,59 @@ class GeneratorRecurrentGANRes(nn.Module):
 
         self.fc1 = nn.Linear(self.z_dim, 1024 * 4 * 4)
         # state size. (1024) x 4 x 4
-        self.resup1 = ResUpBlock(1024, 1024, condition_dim,
-                                 conditional=self.conditional,
-                                 use_spectral_norm=cfg.generator_sn,
-                                 activation=cfg.activation)
+        self.resup1 = ResUpBlock(
+            1024,
+            1024,
+            condition_dim,
+            conditional=self.conditional,
+            use_spectral_norm=cfg.generator_sn,
+            activation=cfg.activation,
+        )
 
         # state size. (1024) x 8 x 8
-        self.resup2 = ResUpBlock(1024, 512, condition_dim,
-                                 conditional=self.conditional,
-                                 use_spectral_norm=cfg.generator_sn,
-                                 activation=cfg.activation)
+        self.resup2 = ResUpBlock(
+            1024,
+            512,
+            condition_dim,
+            conditional=self.conditional,
+            use_spectral_norm=cfg.generator_sn,
+            activation=cfg.activation,
+        )
 
         extra_channels = 0
-        if cfg.use_fg and cfg.gen_fusion == 'concat':
+        if cfg.use_fg and cfg.gen_fusion == "concat":
             extra_channels = 512
 
         # state size. (512) x 16 x 16
-        self.resup3 = ResUpBlock(512 + extra_channels, 256, condition_dim,
-                                 conditional=self.conditional,
-                                 self_attn=cfg.self_attention,
-                                 use_spectral_norm=cfg.generator_sn,
-                                 activation=cfg.activation)
+        self.resup3 = ResUpBlock(
+            512 + extra_channels,
+            256,
+            condition_dim,
+            conditional=self.conditional,
+            self_attn=cfg.self_attention,
+            use_spectral_norm=cfg.generator_sn,
+            activation=cfg.activation,
+        )
 
         # state size. (256) x 32 x 32
-        self.resup4 = ResUpBlock(256, 128, condition_dim,
-                                 conditional=self.conditional,
-                                 use_spectral_norm=cfg.generator_sn,
-                                 activation=cfg.activation)
+        self.resup4 = ResUpBlock(
+            256,
+            128,
+            condition_dim,
+            conditional=self.conditional,
+            use_spectral_norm=cfg.generator_sn,
+            activation=cfg.activation,
+        )
 
         # state size. (128) x 64 x 64
-        self.resup5 = ResUpBlock(128, 64, condition_dim,
-                                 conditional=self.conditional,
-                                 use_spectral_norm=cfg.generator_sn,
-                                 activation=cfg.activation)
+        self.resup5 = ResUpBlock(
+            128,
+            64,
+            condition_dim,
+            conditional=self.conditional,
+            use_spectral_norm=cfg.generator_sn,
+            activation=cfg.activation,
+        )
 
         # state size. (64) x 128 x 128
         self.bn = nn.BatchNorm2d(64)
@@ -88,16 +110,13 @@ class GeneratorRecurrentGANRes(nn.Module):
 
         if cfg.cond_kl_reg is not None:
             self.condition_projector = ConditioningAugmentor(
-                condition_dim,
-                cfg.conditioning_dim)
+                condition_dim, cfg.conditioning_dim
+            )
         else:
             self.condition_projector = nn.Linear(condition_dim, cfg.conditioning_dim)
 
         self.gate = nn.Sequential(
-            nn.Linear(condition_dim, 512),
-            nn.ReLU(),
-            nn.Linear(512, 512),
-            nn.Sigmoid()
+            nn.Linear(condition_dim, 512), nn.ReLU(), nn.Linear(512, 512), nn.Sigmoid()
         )
         self.cfg = cfg
 
@@ -116,11 +135,11 @@ class GeneratorRecurrentGANRes(nn.Module):
 
         sigma = None
         if self.cfg.use_fg:
-            if self.cfg.gen_fusion == 'gate':
+            if self.cfg.gen_fusion == "gate":
                 sigma = self.gate(y)
                 sigma = sigma.unsqueeze(2).unsqueeze(3)
                 x = x * sigma + img_feats * (1 - sigma)
-            elif self.cfg.gen_fusion == 'concat':
+            elif self.cfg.gen_fusion == "concat":
                 x = torch.cat([x, img_feats], dim=1)
 
         x = self.resup3(x, y)

@@ -17,24 +17,25 @@ class ImageEncoder(nn.Module):
         self.encode_image = cfg.use_fg
 
         if self.encode_image:
-            if cfg.img_encoder_type == 'res_blocks':
+            if cfg.img_encoder_type == "res_blocks":
                 self.image_encoder = nn.Sequential(
                     # 3 x 128 x 128
-                    ResDownBlock(3, 64, downsample=True,
-                                 use_spectral_norm=False),
+                    ResDownBlock(3, 64, downsample=True, use_spectral_norm=False),
                     # 64 x 64 x 64
                     nn.BatchNorm2d(64),
-                    ResDownBlock(64, 128, downsample=True,
-                                 use_spectral_norm=False),
+                    ResDownBlock(64, 128, downsample=True, use_spectral_norm=False),
                     # 128 x 32 x 32
                     nn.BatchNorm2d(128),
-                    ResDownBlock(128, cfg.image_feat_dim,
-                                 downsample=True,
-                                 use_spectral_norm=False),
+                    ResDownBlock(
+                        128,
+                        cfg.image_feat_dim,
+                        downsample=True,
+                        use_spectral_norm=False,
+                    ),
                     nn.BatchNorm2d(cfg.image_feat_dim),
                     # 256 x 16 x 16
                 )
-            elif cfg.img_encoder_type == 'conv':
+            elif cfg.img_encoder_type == "conv":
                 self.image_encoder = nn.Sequential(
                     nn.Conv2d(3, 64, 4, 2, 1, bias=False),
                     nn.ReLU(),
@@ -42,13 +43,11 @@ class ImageEncoder(nn.Module):
                     nn.Conv2d(64, 128, 4, 2, 1, bias=False),
                     nn.ReLU(),
                     nn.BatchNorm2d(128),
-                    nn.Conv2d(128, cfg.image_feat_dim, 4, 2, 1,
-                              bias=False),
+                    nn.Conv2d(128, cfg.image_feat_dim, 4, 2, 1, bias=False),
                     nn.BatchNorm2d(cfg.image_feat_dim),
                 )
 
-            self.object_detector = nn.Linear(cfg.image_feat_dim,
-                                             cfg.num_objects)
+            self.object_detector = nn.Linear(cfg.image_feat_dim, cfg.num_objects)
 
         self.cfg = cfg
 

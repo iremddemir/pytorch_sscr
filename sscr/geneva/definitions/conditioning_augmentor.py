@@ -40,6 +40,7 @@ class ConditioningAugmentor(nn.Module):
         OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         SOFTWARE.
     """
+
     def __init__(self, emb_dim, ca_dim):
         super(ConditioningAugmentor, self).__init__()
         self.t_dim = emb_dim
@@ -50,8 +51,8 @@ class ConditioningAugmentor(nn.Module):
 
     def encode(self, text_embedding):
         x = self.relu(self.fc(text_embedding))
-        mu = x[:, :self.c_dim]
-        logvar = x[:, self.c_dim:]
+        mu = x[:, : self.c_dim]
+        logvar = x[:, self.c_dim :]
         return mu, logvar
 
     def reparametrize(self, mu, logvar):

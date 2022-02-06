@@ -11,8 +11,7 @@ class ConditionEncoder(nn.Module):
     def __init__(self, cfg):
         super(ConditionEncoder, self).__init__()
 
-        self.text_projection = nn.Linear(cfg.embedding_dim,
-                                         cfg.projected_text_dim)
+        self.text_projection = nn.Linear(cfg.embedding_dim, cfg.projected_text_dim)
         self.bn = nn.BatchNorm1d(cfg.input_dim)
         self.cfg = cfg
 

@@ -6,10 +6,10 @@ from geneva.models.inference_models.recurrent_gan import InferenceRecurrentGAN
 
 
 MODELS = {
-    'recurrent_gan': RecurrentGAN,
+    "recurrent_gan": RecurrentGAN,
 }
 
 
 INFERENCE_MODELS = {
-    'recurrent_gan': InferenceRecurrentGAN,
+    "recurrent_gan": InferenceRecurrentGAN,
 }

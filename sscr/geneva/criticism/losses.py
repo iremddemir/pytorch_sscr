@@ -4,11 +4,12 @@
 import torch.nn.functional as F
 
 
-class HingeAdversarial():
+class HingeAdversarial:
     """Hinge Adversarial Loss as used in
     https://arxiv.org/pdf/1802.05957.pdf"""
+
     @staticmethod
-    def discriminator(real, fake, wrong=None, wrong_weight=0.):
+    def discriminator(real, fake, wrong=None, wrong_weight=0.0):
         """Discriminator loss term
         Args:
             - real: D(x)
@@ -17,14 +18,14 @@ class HingeAdversarial():
         Returns:
             - loss: Tensor containing the loss mean
         """
-        l_real = F.relu(1. - real).mean()
-        l_fake = F.relu(1. + fake).mean()
+        l_real = F.relu(1.0 - real).mean()
+        l_fake = F.relu(1.0 + fake).mean()
 
         if wrong is None:
             return l_real + l_fake
         else:
-            l_wrong = F.relu(1. + wrong).mean()
-            return l_real + wrong_weight * l_wrong + (1. - wrong_weight) * l_fake
+            l_wrong = F.relu(1.0 + wrong).mean()
+            return l_real + wrong_weight * l_wrong + (1.0 - wrong_weight) * l_fake
 
     @staticmethod
     def generator(fake):
@@ -37,8 +38,9 @@ class HingeAdversarial():
         return -fake.mean()
 
 
-class Adversarial():
+class Adversarial:
     """Classical Adversarial loss"""
+
     @staticmethod
     def discriminator(real, fake):
         """Discriminator loss term
@@ -48,8 +50,7 @@ class Adversarial():
         Returns:
             - loss: Tensor containing the loss mean
         """
-        return F.softplus(-real).mean() \
-            + F.softplus(fake).mean()
+        return F.softplus(-real).mean() + F.softplus(fake).mean()
 
     @staticmethod
     def generator(fake):
@@ -63,6 +64,6 @@ class Adversarial():
 
 
 LOSSES = {
-    'classical': Adversarial,
-    'hinge': HingeAdversarial,
+    "classical": Adversarial,
+    "hinge": HingeAdversarial,
 }

@@ -11,8 +11,8 @@ from torch.nn.utils import spectral_norm
 
 
 class SelfAttention(nn.Module):
-    """Self Attention Module as in https://arxiv.org/pdf/1805.08318.pdf
-    """
+    """Self Attention Module as in https://arxiv.org/pdf/1805.08318.pdf"""
+
     def __init__(self, C):
         """
         Args:
@@ -21,11 +21,14 @@ class SelfAttention(nn.Module):
         super(SelfAttention, self).__init__()
 
         self.f_x = spectral_norm(
-            nn.Conv2d(in_channels=C, out_channels=C // 8, kernel_size=1))
+            nn.Conv2d(in_channels=C, out_channels=C // 8, kernel_size=1)
+        )
         self.g_x = spectral_norm(
-            nn.Conv2d(in_channels=C, out_channels=C // 8, kernel_size=1))
+            nn.Conv2d(in_channels=C, out_channels=C // 8, kernel_size=1)
+        )
         self.h_x = spectral_norm(
-            nn.Conv2d(in_channels=C, out_channels=C, kernel_size=1))
+            nn.Conv2d(in_channels=C, out_channels=C, kernel_size=1)
+        )
 
         self.gamma = nn.Parameter(torch.zeros(1))
 

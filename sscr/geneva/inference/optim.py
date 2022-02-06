@@ -6,18 +6,16 @@ import torch
 
 
 def _adam(parameters, lr, beta_1=0.9, beta_2=0.999, weight_decay=0):
-    return torch.optim.Adam(params=parameters,
-                            lr=lr,
-                            betas=(beta_1, beta_2),
-                            weight_decay=weight_decay)
+    return torch.optim.Adam(
+        params=parameters, lr=lr, betas=(beta_1, beta_2), weight_decay=weight_decay
+    )
 
 
 def _rmsprop(parameters, lr):
-    return torch.optim.RMSprop(params=parameters,
-                               lr=lr)
+    return torch.optim.RMSprop(params=parameters, lr=lr)
 
 
 OPTIM = {
-    'adam': _adam,
-    'rmsprop': _rmsprop,
+    "adam": _adam,
+    "rmsprop": _rmsprop,
 }

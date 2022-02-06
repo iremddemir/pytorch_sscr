@@ -13,7 +13,7 @@ from geneva.definitions.activations import ACTIVATIONS
 from geneva.definitions.res_blocks import ResDownBlock
 
 
-class DiscriminatorFactory():
+class DiscriminatorFactory:
     @staticmethod
     def create_instance(cfg):
         """Creates an instance of a discriminator that matches
@@ -24,7 +24,7 @@ class DiscriminatorFactory():
         Returns:
              discriminator: discriminator instance that implements nn.Module
         """
-        if cfg.gan_type == 'recurrent_gan':
+        if cfg.gan_type == "recurrent_gan":
             return DiscriminatorAdditiveGANRes(cfg)
 
 
@@ -39,58 +39,81 @@ class DiscriminatorAdditiveGANRes(nn.Module):
 
         self.activation = ACTIVATIONS[cfg.activation]
 
-        self.resdown1 = ResDownBlock(3, 64, downsample=True, first_block=True,
-                                     activation=cfg.activation,
-                                     use_spectral_norm=cfg.disc_sn)
+        self.resdown1 = ResDownBlock(
+            3,
+            64,
+            downsample=True,
+            first_block=True,
+            activation=cfg.activation,
+            use_spectral_norm=cfg.disc_sn,
+        )
         # state size. (64) x 64 x 64
-        self.resdown2 = ResDownBlock(64, 128, downsample=True,
-                                     activation=cfg.activation,
-                                     use_spectral_norm=cfg.disc_sn)
+        self.resdown2 = ResDownBlock(
+            64,
+            128,
+            downsample=True,
+            activation=cfg.activation,
+            use_spectral_norm=cfg.disc_sn,
+        )
         # state size. (128) x 32 x 32
-        self.resdown3 = ResDownBlock(128, 256, downsample=True,
-                                     activation=cfg.activation,
-                                     use_spectral_norm=cfg.disc_sn)
+        self.resdown3 = ResDownBlock(
+            128,
+            256,
+            downsample=True,
+            activation=cfg.activation,
+            use_spectral_norm=cfg.disc_sn,
+        )
 
         extra_channels = 0
-        if cfg.use_fd and cfg.disc_img_conditioning == 'concat':
+        if cfg.use_fd and cfg.disc_img_conditioning == "concat":
             extra_channels += 256
 
-        if cfg.conditioning == 'concat':
+        if cfg.conditioning == "concat":
             extra_channels += cfg.disc_cond_channels
 
         # state size. (256) x 16 x 16
-        self.resdown4 = ResDownBlock(256 + extra_channels, 512,
-                                     downsample=True,
-                                     self_attn=cfg.self_attention,
-                                     activation=cfg.activation,
-                                     use_spectral_norm=cfg.disc_sn)
+        self.resdown4 = ResDownBlock(
+            256 + extra_channels,
+            512,
+            downsample=True,
+            self_attn=cfg.self_attention,
+            activation=cfg.activation,
+            use_spectral_norm=cfg.disc_sn,
+        )
         # state size. (512) x 8 x 8
-        self.resdown5 = ResDownBlock(512, 1024,
-                                     downsample=True,
-                                     activation=cfg.activation,
-                                     use_spectral_norm=cfg.disc_sn)
+        self.resdown5 = ResDownBlock(
+            512,
+            1024,
+            downsample=True,
+            activation=cfg.activation,
+            use_spectral_norm=cfg.disc_sn,
+        )
 
         # state size. (1024) x 4 x 4
-        self.resdown6 = ResDownBlock(1024, 1024, downsample=False,
-                                     activation=cfg.activation,
-                                     use_spectral_norm=cfg.disc_sn)
+        self.resdown6 = ResDownBlock(
+            1024,
+            1024,
+            downsample=False,
+            activation=cfg.activation,
+            use_spectral_norm=cfg.disc_sn,
+        )
 
         self.linear = torch.nn.Linear(1024, 1)
         if cfg.disc_sn:
             self.linear = spectral_norm(self.linear)
 
-        if cfg.gan_type == 'recurrent_gan':
+        if cfg.gan_type == "recurrent_gan":
             condition_dim = cfg.hidden_dim
-        elif cfg.gan_type == 'additive_gan':
+        elif cfg.gan_type == "additive_gan":
             condition_dim = cfg.embedding_dim
 
-        if cfg.conditioning == 'projection':
+        if cfg.conditioning == "projection":
             self.condition_projector = nn.Sequential(
                 torch.nn.Linear(condition_dim, 1024),
                 nn.ReLU(),
                 torch.nn.Linear(1024, 1024),
             )
-        elif cfg.conditioning == 'concat':
+        elif cfg.conditioning == "concat":
             self.condition_projector = nn.Sequential(
                 torch.nn.Linear(condition_dim, 1024),
                 nn.ReLU(),
@@ -106,7 +129,7 @@ class DiscriminatorAdditiveGANRes(nn.Module):
         self.cfg = cfg
 
     def forward(self, x, y, prev_image):
-        
+
         if self.cfg.use_fd:
             prev_image = self.resdown1(prev_image)
             prev_image = self.resdown2(prev_image)
@@ -119,12 +142,12 @@ class DiscriminatorAdditiveGANRes(nn.Module):
         x = self.resdown3(x)
 
         if self.cfg.use_fd:
-            if self.cfg.disc_img_conditioning == 'concat':
+            if self.cfg.disc_img_conditioning == "concat":
                 x = torch.cat((x, prev_image), dim=1)
             else:
                 x = x - prev_image
 
-        if self.cfg.conditioning == 'concat':
+        if self.cfg.conditioning == "concat":
             H, W = x.size(2), x.size(3)
             y = y.repeat(H, W, 1, 1).permute(2, 3, 0, 1)
             x = torch.cat([x, y], dim=1)
@@ -142,7 +165,7 @@ class DiscriminatorAdditiveGANRes(nn.Module):
 
         out = self.linear(x).squeeze(1)
 
-        if self.cfg.conditioning == 'projection':
+        if self.cfg.conditioning == "projection":
             c = torch.sum(y * x, dim=1)
             out = out + c
 

@@ -48,21 +48,23 @@ def gradient_penalty(discriminator_out, data_point):
         SOFTWARE.
     """
     batch_size = data_point.size(0)
-    grad_dout = autograd.grad(outputs=discriminator_out.sum(),
-                              inputs=data_point,
-                              create_graph=True,
-                              retain_graph=True,
-                              only_inputs=True)[0]
+    grad_dout = autograd.grad(
+        outputs=discriminator_out.sum(),
+        inputs=data_point,
+        create_graph=True,
+        retain_graph=True,
+        only_inputs=True,
+    )[0]
 
     grad_dout2 = grad_dout.pow(2)
-    assert(grad_dout2.size() == data_point.size())
+    assert grad_dout2.size() == data_point.size()
     reg = grad_dout2.view(batch_size, -1).sum(1)
 
     return reg
 
 
 def kl_penalty(mu, logvar):
-    """ -0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2) """
+    """-0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)"""
     KLD_element = mu.pow(2).add_(logvar.exp()).mul_(-1).add_(1).add_(logvar)
     KLD = torch.mean(KLD_element).mul_(-0.5)
     return KLD

@@ -6,6 +6,6 @@ from geneva.data import codraw_dataset
 
 
 DATASETS = {
-    'codraw': codraw_dataset.CoDrawDataset,
-    'iclevr': clevr_dataset.ICLEVERDataset,
+    "codraw": codraw_dataset.CoDrawDataset,
+    "iclevr": clevr_dataset.ICLEVERDataset,
 }
