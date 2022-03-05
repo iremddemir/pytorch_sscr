@@ -2,3 +2,5 @@
 
 # pretrained model files
 *.pt
+
+logs/*
