@@ -3,4 +3,4 @@
 # pretrained model files
 *.pt
 
-logs/*
+sscr/logs/*
