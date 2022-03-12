@@ -1,52 +1,29 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
-"""PyTorch Dataset implementation for CoDraw dataset"""
+"""PyTorch Dataset implementation for Iterative CLEVR dataset"""
+import json
+
+import cv2
 import h5py
 import numpy as np
 import torch
-import torch.nn as nn
+from torch.utils.data import Dataset
 
 from geneva.utils.config import keys
 
 
-class CoDrawDataset(nn.Module):
-    def __init__(self, path, cfg, img_size=128, glove_path=None):
-        super(CoDrawDataset, self).__init__()
+class SIMGEDataset(Dataset):
+    def __init__(self, path, cfg, img_size=128):
+        super().__init__()
         self.dataset = None
         self.dataset_path = path
-
-        with h5py.File(path, "r") as f:
-            self.background = f["background"].value.transpose(2, 0, 1)
-            self.background = self.background / 128.0 - 1
-            self.background += np.random.uniform(
-                size=self.background.shape, low=0, high=1.0 / 64
-            )
+        self.img_size = img_size
 
         self.glove = _parse_glove(keys[cfg.dataset + "_glove_path"])
-
-        with open(keys["codraw_objects"], "r") as f:
-            self.entities = np.array([l.strip() for l in f])
-
-        self.keys = []
         with h5py.File(path, "r") as f:
-            for i in range(len(list(f.keys())) - 1):
-                self.keys.append(f[str(i)]["objects"].shape[0])
-
-        if "train" in path:
-            self.keys = self.keys[: int(len(self.keys) * 1.0)]
-            self.LEN = len(self.keys)
-            print("train: %d" % (self.LEN))
-        else:
-            self.LEN = len(self.keys)
-
-        self.keys = np.argsort(np.array(self.keys))[::-1]
-        self.blocks_maps = {}
-        for i in range(0, len(self.keys) - 1, cfg.batch_size):
-            block_key = i // cfg.batch_size
-            self.blocks_maps[block_key] = self.keys[i : i + cfg.batch_size]
-
-        self.blocks_keys = np.array(list(self.blocks_maps.keys()))
-        self.cfg = cfg
+            self.keys = list(f.keys())
+            self.keys.remove("entities")
+            self.entities = np.array(json.loads(f["entities"][...].tolist()))
 
         self.glove["<BOS>"] = np.ones((300,)) * -1
         self.glove["<EOS>"] = np.ones((300,)) * 1
@@ -57,66 +34,77 @@ class CoDrawDataset(nn.Module):
         GLOVE_KEY = self.glove_key
 
     def __len__(self):
-        return self.LEN
+        return len(self.keys)
 
     def __getitem__(self, idx):
         if self.dataset is None:
             self.dataset = h5py.File(self.dataset_path, "r")
 
-        block_index = self.blocks_keys[idx // self.cfg.batch_size]
-        sample_index = idx % self.cfg.batch_size
+        example = self.dataset[self.keys[idx]]
 
-        if sample_index > len(self.blocks_maps[block_index]) - 1:
-            sample_index = len(self.blocks_maps[block_index]) - 1
+        scene_id = example["scene_id"][...]
+        orig_images = example["images"][...].astype('float64')
+        text = example["text"][...].tolist()
+        objects = example["objects"][...]
 
-        example = self.dataset[str(self.blocks_maps[block_index][sample_index])]
-        images = example["images"].value
-        turns = example["utterences"].value
-        objects = example["objects"].value
-        scene_id = example["scene_id"].value
+        images = np.zeros((orig_images.shape[0], self.img_size, self.img_size, 3), orig_images.dtype)
+        for i in range(orig_images.shape[0]):
+            images[i] = cv2.resize(orig_images[i][:, :, ::-1], (self.img_size, self.img_size))
+        
+        images = images / 128.0 - 1
+        
+        images += np.random.uniform(size=images.shape, low=0, high=1.0 / 128)
+        images = images.transpose(0, 3, 1, 2)
+
+        text = json.loads(text)
+
+        background = example["background"][...][:, :, ::-1].astype('float64')
+        background = cv2.resize(background, (self.img_size, self.img_size))
+        background = background.transpose(2, 0, 1)
+        
+        background = background / 128.0 - 1
+
+        background += np.random.uniform(
+            size=background.shape, low=0, high=1.0 / 128
+        )
 
         # DO SSCR BY REPLACING TOKEN IN TEXT
 
-        turns_tokenized = [t.split() for t in turns]
+        turns_tokenized = [t.split() for t in text]
         lengths = [len(t) + 2 for t in turns_tokenized]
 
-        turns_word_embeddings = np.zeros((len(turns), max(lengths), 300))
-        turns_word = (
-            np.ones((len(turns), max(lengths)), dtype=np.int32)
-            * self.glove_key["<PAD>"]
+        turn_word_embeddings = np.zeros((len(text), max(lengths), 300))
+        turn_word = (
+            np.ones((len(text), max(lengths)), dtype=np.int32) * self.glove_key["<PAD>"]
         )
 
         for i, turn in enumerate(turns_tokenized):
-            turns_word[i, 0] = self.glove_key["<BOS>"]
+            turn_word[i, 0] = self.glove_key["<BOS>"]
 
             for j, w in enumerate(turn):
-                turns_word_embeddings[i, j] = self.glove[w]
-                turns_word[i, j + 1] = self.glove_key[w]
+                turn_word_embeddings[i, j] = self.glove[w]
+                turn_word[i, j + 1] = self.glove_key[w]
 
             j += 1
-            turns_word[i, j + 1] = self.glove_key["<EOS>"]
-
-        images = images[..., ::-1]
-        images = images / 128.0 - 1
-        images += np.random.uniform(size=images.shape, low=0, high=1.0 / 64)
-        images = images.transpose(0, 3, 1, 2)
+            turn_word[i, j + 1] = self.glove_key["<EOS>"]
 
         sample = {
             "scene_id": scene_id,
             "image": images,
-            "turns": turns,
+            "turn": text,
             "objects": objects,
-            "turns_word_embedding": turns_word_embeddings,
+            "turn_word_embedding": turn_word_embeddings,
             "turn_lengths": lengths,
-            "background": self.background,
+            "background": background,
             "entities": self.entities,
-            "turns_word": turns_word,
+            "turn_word": turn_word,
         }
 
         return sample
-
+    
     def shuffle(self):
-        np.random.shuffle(self.blocks_keys)
+        np.random.shuffle(self.keys)
+
 
 
 def _parse_glove(glove_path):
@@ -148,18 +136,18 @@ def collate_data(batch):
         np.ones((batch_size, max_len, longest_turn), dtype=np.int32) * 4792
     )
     stacked_turn_lengths = np.zeros((batch_size, max_len))
-    stacked_objects = np.zeros((batch_size, max_len, 58))
+    stacked_objects = np.zeros((batch_size, max_len, 1097))
     turns_text = []
     scene_ids = []
 
     background = None
     for i, b in enumerate(batch):
         img = b["image"]
-        turns = b["turns"]
+        turns = b["turn"]
         background = b["background"]
         entities = b["entities"]
-        turns_word_embedding = b["turns_word_embedding"]
-        turns_word = b["turns_word"]
+        turns_word_embedding = b["turn_word_embedding"]
+        turns_word = b["turn_word"]
         turns_lengths = b["turn_lengths"]
 
         dialog_length = img.shape[0]

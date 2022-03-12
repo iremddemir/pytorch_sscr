@@ -3,9 +3,11 @@
 """Datasets Manager"""
 from geneva.data import clevr_dataset
 from geneva.data import codraw_dataset
+from geneva.data import simge_dataset
 
 
 DATASETS = {
     "codraw": codraw_dataset.CoDrawDataset,
     "iclevr": clevr_dataset.ICLEVERDataset,
+    "simge": simge_dataset.SIMGEDataset,
 }

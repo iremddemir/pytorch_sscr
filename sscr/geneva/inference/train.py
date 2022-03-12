@@ -14,6 +14,7 @@ from geneva.utils.visualize import VisdomPlotter
 from geneva.models.models import MODELS
 from geneva.data import codraw_dataset
 from geneva.data import clevr_dataset
+from geneva.data import simge_dataset
 
 from tqdm import tqdm
 from geneva.utils.logger import Logger
@@ -59,6 +60,8 @@ class Trainer:
             self.dataloader.collate_fn = codraw_dataset.collate_data
         elif cfg.dataset == "iclevr":
             self.dataloader.collate_fn = clevr_dataset.collate_data
+        elif cfg.dataset == "simge":
+            self.dataloader.collate_fn = simge_dataset.collate_data
 
         self.visualizer = VisdomPlotter(env_name=cfg.exp_name, server=cfg.vis_server)
         self.logger = Logger(cfg.log_path, cfg.exp_name)
@@ -67,7 +70,7 @@ class Trainer:
     def train(self):
         iteration_counter = 0
         for epoch in tqdm(range(self.cfg.epochs), ascii=True):
-            if cfg.dataset == "codraw":
+            if cfg.dataset == "codraw" or cfg.dataset == "simge":
                 self.dataset.shuffle()
 
             for batch in self.dataloader:
@@ -101,10 +104,12 @@ class Trainer:
             self.model.ctr.E.load_state_dict(torch.load("models/codraw_1.0_e.pt"))
         elif cfg.dataset == "iclevr":
             self.model.ctr.E.load_state_dict(torch.load("models/iclevr_1.0_e.pt"))
+        elif cfg.dataset == "simge":
+            self.model.ctr.E.load_state_dict(torch.load("models/simge_1.0_e.pt"))
 
         iteration_counter = 0
         for epoch in tqdm(range(self.cfg.epochs), ascii=True):
-            if cfg.dataset == "codraw":
+            if cfg.dataset == "codraw" or cfg.dataset == "simge":
                 self.dataset.shuffle()
 
             for batch in self.dataloader:
@@ -135,7 +140,7 @@ class Trainer:
 
         with tqdm(range(self.cfg.epochs), ascii=True) as TQ:
             for epoch in TQ:
-                if cfg.dataset == "codraw":
+                if cfg.dataset == "codraw" or cfg.dataset == "simge":
                     self.dataset.shuffle()
 
                 for batch in self.dataloader:
@@ -178,8 +183,10 @@ class Trainer:
             dataloader.collate_fn = codraw_dataset.collate_data
         elif cfg.dataset == "iclevr":
             dataloader.collate_fn = clevr_dataset.collate_data
+        elif cfg.dataset == "simge":
+            dataloader.collate_fn = simge_dataset.collate_data
 
-        if cfg.dataset == "codraw":
+        if cfg.dataset == "codraw" or cfg.dataset == "simge":
             dataset.shuffle()
         rec_loss = []
         for batch in dataloader:
@@ -205,6 +212,8 @@ class Trainer:
             self.model.ctr.E.load_state_dict(torch.load("models/codraw_1.0_e.pt"))
         elif cfg.dataset == "iclevr":
             self.model.ctr.E.load_state_dict(torch.load("models/iclevr_1.0_e.pt"))
+        elif cfg.dataset == "simge":
+            self.model.ctr.E.load_state_dict(torch.load("models/simge_1.0_e.pt"))
 
         dataset = DATASETS[cfg.dataset](
             path=keys[cfg.val_dataset], cfg=cfg, img_size=cfg.img_size
@@ -222,6 +231,8 @@ class Trainer:
             dataloader.collate_fn = codraw_dataset.collate_data
         elif cfg.dataset == "iclevr":
             dataloader.collate_fn = clevr_dataset.collate_data
+        elif cfg.dataset == "simge":
+            dataloader.collate_fn = simge_dataset.collate_data
 
         glove_key = list(dataset.glove_key.keys())
 
@@ -302,6 +313,8 @@ class Trainer:
             self.model.ctr.E.load_state_dict(torch.load("models/codraw_1.0.pt"))
         elif cfg.dataset == "iclevr":
             self.model.ctr.E.load_state_dict(torch.load("models/iclevr_1.0.pt"))
+        elif cfg.dataset == "simge":
+            self.model.ctr.E.load_state_dict(torch.load("models/simge_1.0_e.pt"))
 
         dataset = DATASETS[cfg.dataset](
             path=keys[cfg.val_dataset], cfg=cfg, img_size=cfg.img_size
@@ -319,6 +332,8 @@ class Trainer:
             dataloader.collate_fn = codraw_dataset.collate_data
         elif cfg.dataset == "iclevr":
             dataloader.collate_fn = clevr_dataset.collate_data
+        elif cfg.dataset == "simge":
+            dataloader.collate_fn = simge_dataset.collate_data
 
         glove_key = list(dataset.glove_key.keys())
 

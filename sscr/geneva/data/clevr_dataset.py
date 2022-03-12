@@ -18,7 +18,7 @@ class ICLEVERDataset(Dataset):
         self.dataset = None
         self.dataset_path = path
 
-        self.glove = _parse_glove(keys["glove_path"])
+        self.glove = _parse_glove(keys[cfg.dataset + "_glove_path"])
         with h5py.File(path, "r") as f:
             self.keys = list(f.keys())
             self.background = f["background"].value

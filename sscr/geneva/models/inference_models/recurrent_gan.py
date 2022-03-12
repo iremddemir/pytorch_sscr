@@ -58,7 +58,7 @@ class InferenceRecurrentGAN:
         self.cfg = cfg
         self.results_path = cfg.results_path
         if not os.path.exists(cfg.results_path):
-            os.mkdir(cfg.results_path)
+            os.makedirs(cfg.results_path)
 
     def predict(self, batch):
         with torch.no_grad():
@@ -131,9 +131,9 @@ class InferenceRecurrentGAN:
 def _save_predictions(images, text, scene_id, results_path, gt_images):
     for i, scene in enumerate(scene_id):
         if not os.path.exists(os.path.join(results_path, str(scene))):
-            os.mkdir(os.path.join(results_path, str(scene)))
+            os.makedirs(os.path.join(results_path, str(scene)))
         if not os.path.exists(os.path.join(results_path, str(scene) + "_gt")):
-            os.mkdir(os.path.join(results_path, str(scene) + "_gt"))
+            os.makedirs(os.path.join(results_path, str(scene) + "_gt"))
         for t in range(len(images)):
             if t >= len(text[i]):
                 continue

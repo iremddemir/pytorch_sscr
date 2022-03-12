@@ -12,6 +12,7 @@ from geneva.utils.config import keys, parse_config
 from geneva.models.models import INFERENCE_MODELS
 from geneva.data import codraw_dataset
 from geneva.data import clevr_dataset
+from geneva.data import simge_dataset
 
 
 class Tester:
@@ -46,6 +47,8 @@ class Tester:
             self.dataloader.collate_fn = codraw_dataset.collate_data
         elif cfg.dataset == "iclevr":
             self.dataloader.collate_fn = clevr_dataset.collate_data
+        elif cfg.dataset == "simge":
+            self.dataloader.collate_fn = simge_dataset.collate_data
 
         if cfg.results_path is None:
             cfg.results_path = os.path.join(cfg.log_path, cfg.exp_name, "results")

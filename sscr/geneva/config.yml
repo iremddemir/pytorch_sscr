@@ -1,16 +1,22 @@
-glove_path: '../GeNeVA_datasets/data/CoDraw_iCLEVR/glove_codraw_iclevr.txt'
+simge: "../../../datasets/X_101/joined.hdf5"
+simge_objects: "../../../datasets/X_101/entities.txt"
+simge_val: "../../../datasets/X_101/joined.hdf5"
+simge_test: "../../../datasets/X_101/joined.hdf5"
+simge_glove_path: "../../../datasets/X_101/glove_simge.txt"
 
-codraw: '../GeNeVA_datasets/data/CoDraw/codraw_train.h5'
-codraw_background: '../GeNeVA_datasets/data/CoDraw/background.png'
-codraw_objects: '../GeNeVA_datasets/data/CoDraw/objects.txt'
-codraw_test: '../GeNeVA_datasets/data/CoDraw/codraw_test.h5'
-codraw_val: '../GeNeVA_datasets/data/CoDraw/codraw_val.h5'
+codraw: "../../../datasets/CoDraw/codraw_train.h5"
+codraw_background: "../../../datasets/CoDraw/background.png"
+codraw_objects: "../../../datasets/CoDraw/objects.txt"
+codraw_test: "../../../datasets/CoDraw/codraw_test.h5"
+codraw_val: "../../../datasets/CoDraw/codraw_val.h5"
+codraw_glove_path: "../../../datasets/CoDraw_iCLEVR/glove_codraw_iclevr.txt"
 
-iclevr: '../GeNeVA_datasets/data/iCLEVR/clevr_train.h5'
-iclevr_background: '../GeNeVA_datasets/data/iCLEVR/background.png'
-iclevr_objects: '../GeNeVA_datasets/data/iCLEVR/objects.txt'
-iclevr_test: '../GeNeVA_datasets/data/iCLEVR/clevr_test.h5'
-iclevr_val: '../GeNeVA_datasets/data/iCLEVR/clevr_val.h5'
+iclevr: "../../../datasets/iCLEVR/clevr_train.h5"
+iclevr_background: "../../../datasets/iCLEVR/background.png"
+iclevr_objects: "../../../datasets/iCLEVR/objects.txt"
+iclevr_test: "../../../datasets/iCLEVR/clevr_test.h5"
+iclevr_val: "../../../datasets/iCLEVR/clevr_val.h5"
+iclevr_glove_path: "../../../datasets/CoDraw_iCLEVR/glove_codraw_iclevr.txt"
 
-codraw_inception_objects: 'models/codraw_evaluator.pt'
-iclevr_inception_objects: 'models/iclevr_evaluator.pt'
+codraw_inception_objects: "models/codraw_evaluator.pt"
+iclevr_inception_objects: "models/iclevr_evaluator.pt"
